@@ -1,0 +1,128 @@
+# =============================================================================
+# Contract Registry — API and interface contracts
+# =============================================================================
+# This file records all API contracts this project produces or consumes.
+# AI agents check this before modifying API-related code to prevent
+# breaking changes and ensure contract compliance.
+#
+# Bootstrap Agent auto-detects schema files and implementation paths.
+# Human input is needed for: external service relationships, version
+# strategies, and contract ownership.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["frontend", "backend", "fullstack", "library", "monorepo"]
+  requires_human_input:
+    - "contracts[*].owner_team"
+    - "contracts[*].breaking_change_policy"
+    - "contracts[*].sla"
+
+contracts: []
+  # Every contract MUST have an `id` for cross-referencing from other KB files.
+  #
+  # Example: REST API (producer — backend exposes this)
+  #
+  # - id: "contract:rest-v2-admin"
+  #   name: "Admin REST API v2"
+  #   type: rest                          # graphql | rest | grpc | event | websocket | internal
+  #   role: producer                      # producer | consumer | both
+  #   version: "2.0"                      # Current version (semver or label)
+  #   deprecated_versions: []             # e.g., ["1.0 — deprecated 2024-06"]
+  #   schema_file: ""                     # Path to OpenAPI/Swagger spec
+  #   implementation_files:
+  #     - route/api/originals/v2/admin/
+  #     - controller/v2/admin/
+  #   base_url_env_var: "API_BASE_URL"
+  #   auth_required: "jwt"                # none | jwt | api_key | session | oauth2
+  #   rate_limits: ""                     # e.g., "100 req/min per user"
+  #   error_codes:                        # Standard error responses
+  #     - code: 400
+  #       meaning: "Validation error"
+  #     - code: 401
+  #       meaning: "Unauthorized — invalid or missing token"
+  #     - code: 403
+  #       meaning: "Forbidden — insufficient permissions"
+  #     - code: 404
+  #       meaning: "Resource not found"
+  #     - code: 500
+  #       meaning: "Internal server error"
+  #   owner_team: ""                      # HUMAN: Team responsible
+  #   breaking_change_policy: ""          # HUMAN: e.g., "6-month deprecation notice"
+  #   sla: ""                             # HUMAN: e.g., "99.9% uptime, p99 < 200ms"
+  #   features:                           # Cross-ref -> feature_map.yaml
+  #     - "feat:content-management"
+  #     - "feat:user-management"
+  #
+  # Example: GraphQL API (consumer — frontend calls this)
+  #
+  # - id: "contract:graphql-content-api"
+  #   name: "Content GraphQL API"
+  #   type: graphql
+  #   role: consumer
+  #   version: ""
+  #   schema_file: "src/queries/gql/schema.graphql"
+  #   code_generation:
+  #     tool: "graphql-codegen"
+  #     config: "graphql-codegen.yml"
+  #     output_files:
+  #       - "src/queries/gql/schema.d.ts"
+  #   implementation_files:
+  #     - "src/queries/content/"
+  #   external_service:
+  #     name: "originals-api"             # Service name
+  #     type: "internal"                  # internal | third-party
+  #     health_check_url: ""              # Health check endpoint if known
+  #   base_url_env_var: "NEXT_PUBLIC_GQL_BASEURL"
+  #   auth_required: "jwt"
+  #   rate_limits: ""
+  #   error_codes: []
+  #   owner_team: ""
+  #   breaking_change_policy: ""
+  #   sla: ""
+  #   features:
+  #     - "feat:content-picker"
+  #
+  # Example: Event/Message contract
+  #
+  # - id: "contract:order-events"
+  #   name: "Order Events"
+  #   type: event
+  #   role: consumer
+  #   version: "1.0"
+  #   schema_file: "schemas/order-events.asyncapi.yaml"
+  #   implementation_files:
+  #     - "src/consumers/orderConsumer.ts"
+  #   external_service:
+  #     name: "order-service"
+  #     type: "internal"
+  #   message_broker: "kafka"             # kafka | rabbitmq | sqs | pubsub
+  #   auth_required: "none"
+  #   error_codes: []
+  #   owner_team: ""
+  #   features: []
+  #
+  # Example: External third-party API
+  #
+  # - id: "contract:azure-translator"
+  #   name: "Azure Translator API"
+  #   type: rest
+  #   role: consumer
+  #   version: "3.0"
+  #   implementation_files:
+  #     - "common/azure-apis.js"
+  #   external_service:
+  #     name: "Azure Cognitive Services"
+  #     type: "third-party"
+  #     health_check_url: ""
+  #   base_url_env_var: "AZURE_TRANSLATOR_ENDPOINT"
+  #   auth_required: "api_key"
+  #   rate_limits: "2M chars/hour (S1 tier)"
+  #   error_codes: []
+  #   owner_team: ""
+  #   features:
+  #     - "feat:content-translation"

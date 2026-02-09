@@ -1,0 +1,143 @@
+# =============================================================================
+# Test Strategy & Quality Gates
+# =============================================================================
+# Primary owner: QA / Tech Lead
+# Auto-detected: test configs, CI pipeline test steps, coverage configs
+# Human input needed: coverage targets, performance baselines, security checklists
+#
+# Purpose: Ensure AI writes the right type of tests at the right level,
+# not just unit tests. Provides clear "definition of done" criteria so
+# AI output can be automatically verified against measurable standards.
+#
+# Detection results (framework, config files) are in project_profile.yaml.
+# This file covers the STRATEGY and quality gates.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["frontend", "backend", "fullstack", "library", "monorepo"]
+  requires_human_input:
+    - "test_strategy.levels.*.coverage_target"
+    - "test_strategy.quality_gates"
+    - "test_strategy.performance.baselines"
+    - "test_strategy.security.checklist"
+
+test_strategy:
+  # Overall testing philosophy
+  philosophy: ""                        # e.g., "Testing Trophy", "Testing Pyramid", "Mostly integration"
+
+  # ---------------------------------------------------------------
+  # Test Levels — what to test at each layer
+  # ---------------------------------------------------------------
+  levels:
+    unit:
+      framework: ""                     # e.g., vitest, jest, pytest, go test, junit
+      coverage_target: ""               # HUMAN: e.g., "80%", "90% for utils, 70% for components"
+      scope: ""                         # What to unit test
+      patterns: []                      # e.g., ["arrange-act-assert", "given-when-then"]
+      mock_strategy: ""                 # e.g., "vitest.mock for modules, MSW for API calls"
+      example_path: ""                  # Path to a good example test file
+
+    integration:
+      framework: ""                     # May differ from unit
+      coverage_target: ""               # HUMAN: e.g., "Key user flows, service compositions"
+      scope: ""                         # What to integration test
+      test_db: ""                       # e.g., "Docker test container", "in-memory SQLite"
+      patterns: []                      # e.g., ["seed-test-cleanup", "transaction rollback"]
+      example_path: ""
+
+    e2e:
+      framework: ""                     # e.g., Playwright, Cypress
+      scope: ""                         # What to E2E test
+      selectors: ""                     # Selector strategy (data-testid, aria-role, etc.)
+      wait_strategy: ""                 # Wait strategy
+      ci_environment: ""                # How E2E runs in CI
+      base_url_env: ""                  # Environment variable for base URL
+      example_path: ""
+
+  # ---------------------------------------------------------------
+  # Test Environment Setup
+  # ---------------------------------------------------------------
+  test_environment:
+    setup_steps: []                     # Steps to set up test environment
+    # e.g.:
+    # - "docker-compose -f docker-compose.test.yml up -d"
+    # - "npm run db:migrate:test"
+    # - "npm run db:seed:test"
+    teardown_steps: []                  # Steps to tear down
+    env_file: ""                        # Test-specific env file (e.g., ".env.test")
+    parallel_safe: false                # Whether tests can run in parallel
+    isolation_strategy: ""              # e.g., "transaction rollback", "truncate tables"
+
+  # ---------------------------------------------------------------
+  # Test Data Management
+  # ---------------------------------------------------------------
+  test_data:
+    factory_library: ""                 # e.g., "faker", "@faker-js/faker", "factory-boy"
+    fixture_dir: ""                     # Fixture file directory
+    seed_scripts: []                    # Data seeding scripts
+    cleanup_strategy: ""                # Post-test cleanup
+    sensitive_data: ""                  # How to handle sensitive test data
+
+  # ---------------------------------------------------------------
+  # Mocking Guidelines
+  # ---------------------------------------------------------------
+  mocking:
+    strategy: ""                        # Overall mocking philosophy
+    # e.g., "Mock external services, use real DB for integration tests"
+    when_to_mock: []                    # Explicitly what to mock
+    # - "External HTTP APIs -> use nock/MSW"
+    # - "Time-dependent code -> use fake timers"
+    # - "File system -> use memfs or tmp dirs"
+    when_not_to_mock: []                # Explicitly what NOT to mock
+    # - "Database queries in integration tests -> use real test DB"
+    # - "Internal service calls -> test through real call chain"
+
+  # ---------------------------------------------------------------
+  # Flaky Test Policy
+  # ---------------------------------------------------------------
+  flaky_tests:
+    policy: ""                          # e.g., "Quarantine after 3 flakes in a week"
+    quarantine_label: ""                # e.g., "@flaky", "skip.flaky"
+    max_retries_in_ci: 0                # How many retries in CI before marking failed
+    reporting: ""                       # Where flaky tests are tracked
+
+  # ---------------------------------------------------------------
+  # Quality Gates — what must pass at each stage
+  # ---------------------------------------------------------------
+  quality_gates:
+    pre_commit: []                      # e.g., ["lint", "typecheck", "unit tests for changed files"]
+    pre_merge: []                       # e.g., ["full test suite", "coverage >= threshold", "no lint errors"]
+    pre_deploy: []                      # e.g., ["E2E smoke tests", "security scan"]
+    post_deploy: []                     # e.g., ["health check", "smoke test against prod"]
+
+  # ---------------------------------------------------------------
+  # Performance Testing
+  # ---------------------------------------------------------------
+  performance:
+    tool: ""                            # e.g., "k6", "artillery", "lighthouse", "autocannon"
+    baselines: {}                       # HUMAN: {p95_response_ms: 200, lighthouse_performance: 90}
+    budget: {}                          # HUMAN: {bundle_size_kb: 250, lcp_ms: 2500}
+    ci_integration: ""
+
+  # ---------------------------------------------------------------
+  # Security Testing
+  # ---------------------------------------------------------------
+  security:
+    scanner: ""                         # e.g., "snyk", "trivy", "npm audit"
+    checklist: []                       # HUMAN: Security checklist items
+    compliance: []                      # e.g., ["OWASP Top 10", "SOC 2"]
+    dependency_audit: ""                # Audit tool and frequency
+
+  # ---------------------------------------------------------------
+  # Browser & Device Compatibility (frontend only)
+  # ---------------------------------------------------------------
+  compatibility:
+    browsers: []                        # e.g., ["Chrome 120+", "Safari 17+"]
+    devices: []                         # e.g., ["Desktop 1920x1080", "Mobile 375x812"]
+    screen_readers: []                  # e.g., ["VoiceOver", "NVDA"]
+    os: []                              # e.g., ["macOS", "Windows 11", "iOS 17+"]

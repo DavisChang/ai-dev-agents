@@ -1,0 +1,121 @@
+# =============================================================================
+# Feature Map — Business features mapped to code locations
+# =============================================================================
+# This file maps each business feature to its code locations, dependencies,
+# data sources, and business rules. AI agents read this before making changes
+# to understand which code is affected by a feature request.
+#
+# Bootstrap Agent auto-detects entry points and component directories.
+# Human input is needed for: business rules, feature descriptions, and
+# dependency relationships between features.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["frontend", "backend", "fullstack", "library", "cli", "monorepo"]
+  requires_human_input:
+    - "features[*].business_rules"
+    - "features[*].owner"
+    - "features[*].description"
+
+features: []
+  # Every feature MUST have an `id` for cross-referencing from other KB files.
+  #
+  # Example feature entry (backend):
+  #
+  # - id: "feat:user-auth"
+  #   name: "User Authentication"
+  #   description: "Handles user login, token verification, and session management"
+  #   status: active                     # active | deprecated | planned
+  #   owner: ""                          # HUMAN: Team or person responsible
+  #   entry_points:
+  #     - route/api/v1/auth/index.js
+  #     - route/api/v2/auth/index.js
+  #   components:                        # Controllers, handlers, resolvers
+  #     - controller/v1/auth.js
+  #     - controller/v2/auth.js
+  #   services:                          # Business logic layer
+  #     - services/auth.js
+  #   data_sources:                      # DB models, queries, external API calls
+  #     - models/account.js
+  #     - common/jwt.js
+  #   hooks: []                          # Frontend hooks (if applicable)
+  #   styles: []                         # Frontend styles (if applicable)
+  #   tests: []                          # Test files covering this feature
+  #   test_coverage_status: "none"       # none | partial | covered
+  #   api_endpoints:                     # REST/GraphQL endpoints this feature owns
+  #     - "POST /api/v1/auth/login"
+  #     - "GET /api/v1/auth/me"
+  #   contracts:                         # Cross-ref -> contract_registry.yaml
+  #     - "contract:rest-v1-auth"
+  #   models:                            # Cross-ref -> data_models.yaml
+  #     - "model:account"
+  #     - "model:session"
+  #   terms:                             # Cross-ref -> domain_glossary.yaml
+  #     - "term:jwt-token"
+  #   dependencies:                      # Other features this depends on (by ID)
+  #     - "feat:database-infrastructure"
+  #   business_rules:                    # HUMAN: PM input needed
+  #     - "JWT tokens expire after 1 hour"
+  #     - "Refresh tokens are single-use"
+  #   notes: ""
+  #
+  # Example feature entry (frontend):
+  #
+  # - id: "feat:content-picker"
+  #   name: "Content Picker"
+  #   description: "UI for browsing and selecting content items"
+  #   status: active
+  #   owner: ""
+  #   entry_points:
+  #     - src/pages/picker.tsx
+  #   components:
+  #     - src/components/ContentPicker/ContentPicker.tsx
+  #     - src/components/ContentPicker/ContentCard.tsx
+  #   hooks:
+  #     - src/hooks/useContentList.ts
+  #   data_sources:
+  #     - src/queries/content/listContents.ts
+  #   styles:
+  #     - src/components/ContentPicker/ContentPicker.module.css
+  #   tests:
+  #     - src/components/ContentPicker/__tests__/ContentPicker.test.tsx
+  #   test_coverage_status: "partial"
+  #   api_endpoints: []                  # Frontend doesn't own endpoints
+  #   contracts:
+  #     - "contract:graphql-content-api"
+  #   models: []
+  #   terms:
+  #     - "term:content"
+  #   dependencies:
+  #     - "feat:auth"
+  #   business_rules: []                 # HUMAN: PM input needed
+  #   notes: ""
+  #
+  # Shared infrastructure example (not a user-facing feature):
+  #
+  # - id: "feat:shared-middleware"
+  #   name: "Shared Middleware"
+  #   description: "Cross-cutting middleware reused by multiple features"
+  #   status: active
+  #   owner: ""
+  #   entry_points: []
+  #   components:
+  #     - common/authentication.js
+  #     - common/jwt.js
+  #     - common/response/index.js
+  #   services: []
+  #   data_sources: []
+  #   tests: []
+  #   test_coverage_status: "none"
+  #   api_endpoints: []
+  #   contracts: []
+  #   models: []
+  #   terms: []
+  #   dependencies: []
+  #   business_rules: []
+  #   notes: "Not a user-facing feature; infrastructure shared across features"

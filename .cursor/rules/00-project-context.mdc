@@ -1,0 +1,96 @@
+---
+description: Global project context router - loads on every AI interaction to ensure agents read the knowledge base before making changes
+alwaysApply: true
+---
+
+# Project Context Router
+
+You are working in a project that uses a structured AI knowledge base (`.ai-context/`, schema v2.0). Before making ANY code changes, you MUST read the relevant context files.
+
+## Step 1: Read Metadata
+
+**Always read `.ai-context/_meta.yaml` first.** This tells you:
+- `project_type`: backend / frontend / fullstack / library / cli / monorepo
+- `completeness`: per-file completeness scores
+- `skipped_files`: files not applicable to this project (do NOT load these)
+
+If `_meta.yaml` does not exist or `overall_completeness` is 0:
+> "The AI knowledge base is not yet populated. Please run: 'Bootstrap the AI context for this project' to auto-detect and fill in the project profile."
+
+## Step 2: Determine Change Type and Load Context
+
+Based on the task at hand, load ONLY the relevant files:
+
+### Feature Work (new feature, enhancement, UI change)
+1. `.ai-context/project_profile.yaml` — tech stack, structure
+2. `.ai-context/feature_map.yaml` — affected features, cross-refs
+3. `.ai-context/contract_registry.yaml` — API contracts
+4. `.ai-context/coding_standards.yaml` — conventions and patterns
+5. `.ai-context/data_models.yaml` — schema and relations (if data work involved)
+6. `.ai-context/domain_glossary.yaml` — terms, roles, permissions
+7. `.ai-context/design_system.yaml` — tokens and components (only if `project_type` is frontend/fullstack)
+
+### Bug Fix
+1. `.ai-context/project_profile.yaml` — tech stack
+2. `.ai-context/feature_map.yaml` — locate affected feature
+3. `.ai-context/coding_standards.yaml` — conventions
+
+### Test Writing
+1. `.ai-context/project_profile.yaml` — test framework
+2. `.ai-context/test_strategy.yaml` — levels, coverage, mocking
+3. `.ai-context/coding_standards.yaml` — test conventions
+
+### Infrastructure / Deployment
+1. `.ai-context/project_profile.yaml` — CI/CD, commands
+2. `.ai-context/environment_map.yaml` — environments, secrets, deploy targets
+3. `.ai-context/repo_manifest.yaml` — ecosystem context
+
+### Refactoring
+1. `.ai-context/project_profile.yaml` — tech stack
+2. `.ai-context/feature_map.yaml` — affected features
+3. `.ai-context/coding_standards.yaml` — patterns to follow
+4. `.ai-context/contract_registry.yaml` — ensure no contract breaks
+
+### Database / Schema Work
+1. `.ai-context/project_profile.yaml` — ORM, DB info
+2. `.ai-context/data_models.yaml` — entities, fields, indexes, naming conventions
+3. `.ai-context/domain_glossary.yaml` — business entity lifecycle, validation rules
+
+## Rules — Never Do These
+
+- **Never modify code** without first checking `feature_map.yaml` for affected features and `contract_registry.yaml` for affected contracts.
+- **Never hardcode** environment-specific values. Check `environment_map.yaml` for correct env var names.
+- **Never hardcode** enum values, tier names, plan names, or feature flags. Import from project constants files listed in `project_profile.yaml` → `constants_files`.
+- **Never hardcode** API route paths. Use constants from the file specified in `contract_registry.yaml` → `route_constants_file` or `api_patterns.route_constants_file`.
+- **Never hardcode** UI values (colors, spacing, font sizes). Use tokens from `design_system.yaml` (frontend/fullstack only).
+- **Never introduce** a new pattern without checking if `coding_standards.yaml` already specifies one.
+- **Never assume** cross-repo behavior. Check `repo_manifest.yaml` for ecosystem context.
+- **Never confuse** domain terms. Check `domain_glossary.yaml` for precise definitions and role permissions.
+- **Never skip** permission checks. Reference `domain_glossary.yaml` → `roles` for access control.
+- **Never violate** database schema. Check `data_models.yaml` before writing queries or migrations.
+- **Respect routing basePath** from `project_profile.yaml` → `routing.base_path`.
+- **Always reference** existing project documentation listed in `project_profile.yaml` → `documentation.existing_docs`.
+
+## Cross-Reference IDs
+
+Knowledge base files use stable IDs for cross-referencing:
+- **Features**: `feat:feature-name` (in `feature_map.yaml`)
+- **Contracts**: `contract:name` (in `contract_registry.yaml`)
+- **Models**: `model:name` (in `data_models.yaml`)
+- **Terms**: `term:name` (in `domain_glossary.yaml`)
+
+When you see these IDs in any file, look up the referenced entry in the corresponding KB file.
+
+## KB Update Protocol
+
+When any agent updates a knowledge base file:
+1. Updates are **APPEND/MERGE**, never full overwrite
+2. Lines with `# HUMAN:` prefix are **NEVER modified** by agents
+3. After update, update the file's `_meta.last_updated` timestamp
+4. If a file changed since you last read it, re-read before writing
+
+## Error Handling
+
+- If a required KB file does not exist: **WARN** user, suggest running Bootstrap first
+- If a KB file exists but is empty or has `completeness < 0.3` in `_meta.yaml`: **WARN** user, proceed with available information
+- If `_meta.yaml` shows a file in `skipped_files`: do NOT attempt to load it

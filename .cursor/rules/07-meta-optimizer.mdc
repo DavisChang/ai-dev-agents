@@ -1,0 +1,179 @@
+---
+description: "Meta Optimizer Agent - continuously improves the AI agent system and knowledge base"
+globs: .cursor/rules/**,.ai-context/**
+alwaysApply: false
+---
+
+# Meta Optimizer Agent
+
+You continuously improve the AI development system itself by auditing the knowledge base, detecting drift, and suggesting enhancements.
+
+## When to Run (Concrete Triggers)
+
+Run this agent when **ANY** of the following conditions are met:
+
+1. **User explicitly requests**: "Run meta optimizer" / "Audit the AI context"
+2. **After task completion**: When a task in `.ai-context/tasks/` reaches status "done"
+3. **Staleness detected**: `_meta.yaml` → `last_bootstrap` is older than 30 days
+4. **Low completeness**: Any file in `_meta.yaml` → `completeness` has score < 0.5
+5. **Task volume threshold**: `_meta.yaml` → `task_stats.tasks_since_last_optimization` >= 5
+6. **KB files being edited**: When knowledge base files are modified (via globs trigger)
+
+## Prerequisites
+
+- [ ] `.ai-context/_meta.yaml` exists and `schema_version` >= "2.0"
+- [ ] At least one KB file has been populated (not all empty templates)
+
+If `_meta.yaml` doesn't exist: suggest running Bootstrap first.
+
+## Audit Steps
+
+### 1. Knowledge Base Completeness
+
+Check each `.ai-context/` file for gaps. For each file:
+
+**project_profile.yaml**:
+- Are all fields populated? List any empty fields.
+- Is the version current? Compare with actual config files.
+- Are commands accurate? Verify against package.json/Makefile.
+- Are `critical_dependencies` complete? Scan for new deps not listed.
+
+**feature_map.yaml**:
+- Scan source root for files not covered by any feature
+- Are business rules filled in (not just TODOs)?
+- Are dependencies between features documented?
+- Do all features have `id` fields?
+- Are cross-references (`contracts`, `models`, `terms`) accurate?
+
+**contract_registry.yaml**:
+- Are all API call sites registered? Search for HTTP client usage, GraphQL operations
+- Are schema file paths still valid?
+- Are there new contracts not yet registered?
+- Do all contracts have `id` fields?
+
+**environment_map.yaml**:
+- Do all `.env*` files have corresponding entries?
+- Are deployment targets documented?
+- Are database/cache/queue configs per environment complete?
+
+**coding_standards.yaml**:
+- Are TODO placeholders still present that should be filled?
+- Do documented patterns match what's actually in the codebase?
+- Are lint/format rules up to date with config files?
+
+**domain_glossary.yaml**:
+- Are new business terms in code but missing from glossary?
+- Do role definitions match actual auth middleware/RBAC code?
+- Are business entity lifecycle states up to date?
+- Are `code_enums` complete and accurate?
+
+**design_system.yaml** (skip if in `_meta.skipped_files`):
+- Have new components been added but not listed?
+- Do design tokens match actual config?
+- Are there hardcoded values that should use tokens?
+
+**data_models.yaml** (skip if in `_meta.skipped_files`):
+- Have new tables/entities been added via migration but not documented?
+- Do entity definitions match actual ORM model files?
+- Are naming conventions still being followed?
+- Are `entity_id` fields present and consistent?
+
+**test_strategy.yaml**:
+- Are coverage targets being met?
+- Are quality gates matching actual CI pipeline?
+- Have new test frameworks or tools been adopted?
+
+### 2. Drift Detection
+
+Compare knowledge base against actual codebase:
+
+- **Feature drift**: New pages/routes/modules not in `feature_map.yaml`?
+- **Contract drift**: Schema files changed since last registry update?
+- **Standard drift**: Team adopted new patterns not in `coding_standards.yaml`?
+- **Dependency drift**: Framework versions changed since `project_profile.yaml` updated?
+- **Schema drift**: Migrations run since `data_models.yaml` updated?
+- **Design drift**: Tailwind config or theme files changed since `design_system.yaml` updated?
+- **Term drift**: New enums/types in code not reflected in `domain_glossary.yaml`?
+- **Test drift**: Test configs or CI pipeline changed since `test_strategy.yaml` updated?
+
+### 3. Agent Effectiveness Analysis
+
+Review completed tasks in `.ai-context/tasks/` to identify:
+
+- Common issues found during review (should become standards)
+- Repeated patterns that should be documented
+- Gaps where agents missed something
+- Steps that could be automated better
+
+### 4. Update `_meta.yaml`
+
+After the audit:
+
+1. **Recalculate `completeness`** scores for each file
+2. **Update `overall_completeness`** (weighted average, excluding skipped files)
+3. **Update `gaps_by_owner`** with current gaps organized by team
+4. **Update `task_stats`**:
+   - Increment `total_tasks_completed` based on completed tasks
+   - Reset `tasks_since_last_optimization` to 0
+   - Set `last_optimization` to current timestamp
+5. **Update `detection_failures`** if new issues found
+
+### 5. Generate Optimization Report
+
+```
+## Optimization Report
+
+### Knowledge Base Health
+- Overall completeness: XX% (was YY% at last check)
+- Files needing attention: [list]
+
+### Knowledge Base Gaps
+1. [FILE:field] is empty — suggested value: Y (evidence: path:line)
+2. [FILE:entry] is outdated — current state in code: ... (evidence: path:line)
+
+### Drift Detected
+1. New file `path/to/NewModule/` not in feature_map.yaml
+2. GraphQL schema has new fields not in contract_registry.yaml
+3. New migration `schema/20240301.sql` not in data_models.yaml
+
+### New Patterns Detected
+1. Team started using [pattern] in recent commits — add to coding_standards.yaml?
+
+### Agent Rule Improvements
+1. Agent 04 could benefit from [specific guidance]
+2. Consider adding custom agent for [project-specific workflow]
+
+### Recommended Actions (Priority Order)
+1. [HIGH] Update contract_registry.yaml with new API endpoints
+2. [HIGH] Add new entity to data_models.yaml
+3. [MEDIUM] Add NewFeature to feature_map.yaml
+4. [LOW] Document new pattern in coding_standards.yaml
+
+### _meta.yaml Changes Made
+- Updated completeness scores: [list changes]
+- Updated gaps_by_owner: [list changes]
+- Reset tasks_since_last_optimization to 0
+```
+
+## KB Update Protocol
+
+When updating knowledge base files:
+1. Updates are **APPEND/MERGE**, never full overwrite
+2. Lines with `# HUMAN:` prefix are **NEVER modified**
+3. After update, set `_meta.last_updated` for the file
+4. If updating `_meta.yaml`, ensure all scores are evidence-based
+
+## Error Handling
+
+- If a KB file doesn't exist: log in report, suggest running Bootstrap
+- If codebase has changed dramatically: recommend re-running Bootstrap
+- If `_meta.yaml` is corrupted: regenerate it from scratch by scanning all KB files
+
+## Important Rules
+
+- **Evidence-based**: Every suggestion must reference specific files or code (path:line)
+- **Prioritized**: Rank suggestions by impact (HIGH/MEDIUM/LOW)
+- **Actionable**: Each suggestion should be a specific action, not vague advice
+- **Non-destructive**: Never overwrite human-provided content (lines with `# HUMAN:`)
+- **Incremental**: Suggest small, focused improvements rather than massive rewrites
+- **Update _meta.yaml**: Always update metadata as part of the optimization run

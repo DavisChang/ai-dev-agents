@@ -1,0 +1,133 @@
+# =============================================================================
+# Domain Glossary — Terms, Roles & Permissions
+# =============================================================================
+# Primary owner: PM / Product Owner
+# Auto-detected: enums, constants, type definitions -> initial term list
+# Human input needed: precise definitions, role permissions, business entity lifecycle
+#
+# Purpose: Ensure AI uses correct business language, doesn't confuse terms,
+# and never misses permission checks. Reduces hallucination by providing
+# the single source of truth for domain vocabulary.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["frontend", "backend", "fullstack", "library", "monorepo"]
+  requires_human_input:
+    - "glossary.terms[*].definition"
+    - "glossary.roles[*].permissions"
+    - "glossary.business_entities[*].validation_rules"
+
+glossary:
+  # ---------------------------------------------------------------
+  # Business Terms
+  # ---------------------------------------------------------------
+  # AI will reference this to avoid mixing up similar concepts.
+  terms: []
+    # Every term MUST have a `term_id` for cross-referencing.
+    #
+    # - term_id: "term:order"
+    #   term: "Order"
+    #   definition: ""                    # HUMAN: Precise definition
+    #   aliases: []                       # Synonyms or commonly confused terms
+    #   related_code: []                  # Code locations (type, model file paths)
+    #   not_to_confuse_with: ""           # Explicitly state what this is NOT
+    #   domain: ""                        # Which business domain (e.g., "billing", "content")
+    #
+    # Example:
+    # - term_id: "term:original-content"
+    #   term: "Original Content"
+    #   definition: "Educational content created by authors and published on the platform"
+    #   aliases: ["content", "original"]
+    #   related_code: ["models/content.js", "services/content.js"]
+    #   not_to_confuse_with: "Resource (downloadable files attached to content)"
+    #   domain: "content"
+
+  # Terms that should NOT be used — replaced by preferred terms.
+  deprecated_terms: []
+    # - old_term: "item"
+    #   preferred: "content"
+    #   reason: "Standardized to 'content' in v2 API"
+
+  # ---------------------------------------------------------------
+  # Acronyms
+  # ---------------------------------------------------------------
+  acronyms: []
+    # - acronym: "OC"
+    #   expansion: "Original Content"
+    # - acronym: "OIDC"
+    #   expansion: "OpenID Connect"
+
+  # ---------------------------------------------------------------
+  # User Roles & Permissions
+  # ---------------------------------------------------------------
+  # AI will check this before implementing any access-controlled feature.
+  roles: []
+    # - name: "admin"
+    #   description: "Full access to all operations"
+    #   permissions:                       # Structured as resource:action
+    #     - resource: "content"
+    #       actions: ["create", "read", "update", "delete", "publish"]
+    #       conditions: ""                 # e.g., "all content" or "own content only"
+    #     - resource: "user"
+    #       actions: ["read", "update", "delete"]
+    #       conditions: ""
+    #   restrictions: []                   # Explicitly forbidden operations
+    #   ui_scope: []                       # Visible UI areas/pages
+    #
+    # - name: "editor"
+    #   description: "Can create and edit content but cannot publish or delete"
+    #   permissions:
+    #     - resource: "content"
+    #       actions: ["create", "read", "update"]
+    #       conditions: "own content only"
+    #   restrictions: ["publish:content", "delete:content", "manage:users"]
+    #   ui_scope: ["/dashboard", "/content", "/profile"]
+
+  # ---------------------------------------------------------------
+  # Core Business Entities — lifecycle and validation
+  # ---------------------------------------------------------------
+  # AI will reference this to respect state machine transitions.
+  # Technical schema is in data_models.yaml; this is the BUSINESS view.
+  business_entities: []
+    # - name: "Content"
+    #   data_model: "model:content"        # Cross-ref -> data_models.yaml
+    #   attributes: ["id", "title", "status", "author", "created_at"]
+    #   lifecycle_states: ["draft", "pending_review", "published", "archived"]
+    #   state_transitions:
+    #     draft: ["pending_review"]
+    #     pending_review: ["published", "draft"]
+    #     published: ["archived"]
+    #     archived: ["draft"]
+    #   validation_rules:                  # HUMAN: Business-level rules
+    #     - "Title must be 1-200 characters"
+    #     - "Cannot publish without at least one tag"
+    #   ownership: "ContentService"
+
+  # ---------------------------------------------------------------
+  # Code Enums — auto-detected from constants and type definitions
+  # ---------------------------------------------------------------
+  # AI must use these exact values; never invent new enum members.
+  code_enums: []
+    # - name: "ContentStatus"
+    #   source_file: "common/constants/contentStatus.js"
+    #   values: { Draft: "draft", Published: "published", Archived: "archived" }
+    #   usage_context: "Used in content lifecycle and API responses"
+    #
+    # - name: "UserRole"
+    #   source_file: "common/constants/roles.js"
+    #   values: { Admin: "admin", Editor: "editor", Viewer: "viewer" }
+    #   usage_context: "Used in auth middleware and permission checks"
+
+  # ---------------------------------------------------------------
+  # Business Metrics (optional)
+  # ---------------------------------------------------------------
+  business_metrics: []
+    # - name: "Monthly Active Users"
+    #   acronym: "MAU"
+    #   definition: "Unique users who logged in at least once in the past 30 days"
+    #   calculation: "COUNT(DISTINCT user_id) WHERE last_login > NOW() - 30d"

@@ -1,0 +1,84 @@
+# =============================================================================
+# Knowledge Base Metadata — Health, completeness, and gap tracking
+# =============================================================================
+# This file is the FIRST file read by the Context Router (Agent 00).
+# It tells agents what type of project this is, how complete the KB is,
+# and which gaps need human attention.
+#
+# Auto-generated and maintained by Bootstrap (01) and Meta Optimizer (07).
+# =============================================================================
+
+schema_version: "2.0"
+
+# When the Bootstrap Agent last ran
+last_bootstrap: ""                      # ISO 8601 timestamp
+
+# Project classification — drives conditional file loading
+project_type: ""                        # backend | frontend | fullstack | library | cli | monorepo
+
+# Per-file completeness scores (0.0 = empty template, 1.0 = fully populated)
+completeness:
+  project_profile: 0.0
+  feature_map: 0.0
+  contract_registry: 0.0
+  environment_map: 0.0
+  coding_standards: 0.0
+  domain_glossary: 0.0
+  design_system: 0.0                    # N/A for backend — set to -1 when skipped
+  data_models: 0.0                      # N/A for frontend-only — set to -1 when skipped
+  test_strategy: 0.0
+  repo_manifest: 0.0
+
+# Weighted overall completeness (excludes N/A files)
+overall_completeness: 0.0
+
+# Files that were skipped because project_type makes them N/A
+skipped_files: []
+  # e.g., ["design_system.yaml"]  for backend projects
+
+# Detection failures during bootstrap (if any step failed, log it here)
+detection_failures: []
+  # - step: "Step 7: Populate Design System"
+  #   reason: "No tailwind config or CSS custom properties found"
+  #   impact: "design_system.yaml left as template"
+
+# Gaps organized by team/owner who needs to fill them
+gaps_by_owner:
+  pm: []
+    # - file: "domain_glossary.yaml"
+    #   field: "glossary.terms[*].definition"
+    #   description: "Precise term definitions needed"
+    # - file: "feature_map.yaml"
+    #   field: "features[*].business_rules"
+    #   description: "Business rules for each feature"
+  designer: []
+    # - file: "design_system.yaml"
+    #   field: "design_system.accessibility"
+    #   description: "Accessibility requirements and WCAG level"
+  backend: []
+    # - file: "data_models.yaml"
+    #   field: "entities[*].fields[*].validation"
+    #   description: "Business-level validation rules"
+    # - file: "contract_registry.yaml"
+    #   field: "contracts[*].breaking_change_policy"
+    #   description: "Deprecation and versioning policies"
+  qa: []
+    # - file: "test_strategy.yaml"
+    #   field: "test_strategy.levels.*.coverage_target"
+    #   description: "Coverage targets per test level"
+    # - file: "test_strategy.yaml"
+    #   field: "test_strategy.quality_gates"
+    #   description: "Quality gate definitions"
+  infra: []
+    # - file: "environment_map.yaml"
+    #   field: "environments[*].deployment_target"
+    #   description: "Deployment targets per environment"
+    # - file: "repo_manifest.yaml"
+    #   field: "ecosystem.repos"
+    #   description: "Other repos in the ecosystem"
+
+# Task tracking (updated by Meta Optimizer)
+task_stats:
+  total_tasks_completed: 0
+  tasks_since_last_optimization: 0
+  last_optimization: ""                 # ISO 8601 timestamp

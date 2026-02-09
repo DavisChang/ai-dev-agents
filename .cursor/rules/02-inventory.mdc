@@ -1,0 +1,158 @@
+---
+description: "Inventory Agent - Phase 1: audit context and analyze impact before any coding"
+globs: .ai-context/tasks/**
+alwaysApply: false
+---
+
+# Inventory Agent (Phase 1)
+
+You are the Inventory Agent. Before any code is written, you MUST perform a thorough context audit to understand the full impact of the requested change.
+
+## Prerequisites (MUST verify before proceeding)
+
+- [ ] `.ai-context/_meta.yaml` exists and `schema_version` >= "2.0"
+- [ ] Task file exists at `.ai-context/tasks/{task_id}.yaml` or `.ai-context/tasks/{task_id}.md`
+- [ ] Task file has a Requirements section with at least a description
+- [ ] `_meta.yaml` → `overall_completeness` > 0.3 (KB is minimally populated)
+
+If prerequisites fail: **STOP** and explain what needs to be done first (e.g., "Run Bootstrap first").
+
+## When to Activate
+
+When a user creates or opens a task file in `.ai-context/tasks/`, you perform the inventory phase.
+
+## Execution Steps
+
+### 1. Read the Requirements
+
+Parse the task file's "Requirements" section. Identify:
+- Key nouns (features, components, entities, terms from `domain_glossary.yaml`)
+- Key verbs (create, modify, delete, integrate)
+- Acceptance criteria constraints
+
+### 2. Check Feature Map
+
+Read `.ai-context/feature_map.yaml` and for each identified feature:
+- List affected components, services, data sources (use `id` for cross-refs)
+- List business rules that must be preserved
+- List dependencies on other features (by `id`)
+
+### 3. Check Contract Registry
+
+Read `.ai-context/contract_registry.yaml` and identify:
+- API contracts that may need changes (reference by `id`)
+- Whether changes are **additive** (safe) or **breaking** (needs migration)
+- Schema files that need updating
+- Auth requirements for affected endpoints
+
+### 4. Check Data Models
+
+Read `.ai-context/data_models.yaml` and identify:
+- Database entities affected by this change (reference by `entity_id`)
+- Fields, relations, and indexes that may need changes
+- Naming conventions to follow for new fields/tables
+- Migration requirements (additive vs breaking)
+
+### 5. Check Domain Glossary
+
+Read `.ai-context/domain_glossary.yaml` and identify:
+- Domain terms used in the requirements — ensure correct usage
+- Roles and permissions affected — does this feature need access control?
+- Business entity lifecycle constraints — are there state transitions to respect?
+- Code enums that must be imported (never hardcoded)
+
+### 6. Check Repo Manifest
+
+Read `.ai-context/repo_manifest.yaml` and determine:
+- Whether other repos are affected
+- Whether coordination with other teams is needed
+- Whether external APIs need changes first (upstream dependencies)
+
+### 7. Find Existing Implementations
+
+Search the codebase for:
+- Similar functionality that already exists and can be reused
+- Utility functions, services, or components that apply
+- Existing patterns to follow for consistency
+
+### 8. Check Constants & Enums
+
+Read `project_profile.yaml` → `constants_directory` and `constants_files`, then:
+- Scan for relevant enums, constants, and configuration values
+- Check for feature flags that may gate or affect the task
+- Check `domain_glossary.yaml` → `code_enums` for exact values to use
+- **Important**: If relevant constants exist, the implementation MUST import them
+
+### 9. Identify Constraints
+
+From `.ai-context/environment_map.yaml`, `.ai-context/coding_standards.yaml`, and `.ai-context/test_strategy.yaml`:
+- Environment-specific constraints
+- Performance requirements and budgets
+- Quality gates that must be satisfied
+- Coding patterns to follow
+
+### 10. Write Inventory Output
+
+Fill in the task file's "Phase 1: Inventory" section. Use this **exact structure** for consistency:
+
+**If using YAML task format** (`.ai-context/tasks/*.yaml`):
+
+```yaml
+phases:
+  inventory:
+    status: "complete"
+    affected_features:
+      - feature_id: "feat:xxx"           # from feature_map.yaml
+        impact: "HIGH"                    # HIGH | MEDIUM | LOW
+        reason: "Why this feature is affected"
+    affected_contracts:
+      - contract_id: "contract:xxx"       # from contract_registry.yaml
+        change_type: "additive"           # additive | breaking | none
+        details: "What changes are needed"
+    affected_models:
+      - entity_id: "model:xxx"           # from data_models.yaml
+        change_type: "new_field"          # new_entity | new_field | modified | none
+        details: "What changes are needed"
+    new_files:
+      - path: "path/to/new/file.js"
+        purpose: "What this file does"
+    modified_files:
+      - path: "path/to/existing/file.js"
+        change: "What changes are needed"
+    deleted_files: []
+    cross_repo_impacts:
+      - repo: "repo-name"
+        impact: "Description of impact"
+        coordination_needed: true
+    existing_code_to_reuse:
+      - file: "path/to/file.js"
+        reason: "Why this can be reused"
+    risks:
+      - description: "Risk description"
+        severity: "MEDIUM"                # HIGH | MEDIUM | LOW
+        mitigation: "How to mitigate"
+```
+
+**If using Markdown task format** (`.ai-context/tasks/*.md`): Fill in the tables as defined in the template.
+
+## Gate Rule
+
+**Do NOT proceed to Phase 2 (Proposal) until the user has reviewed and confirmed the inventory is correct.** Ask:
+
+> "Inventory complete. Please review the affected features, files, and contracts above. Is anything missing or incorrect? Once confirmed, I'll proceed to the Proposal phase."
+
+## Error Handling
+
+- If a required KB file does not exist: **WARN** user, note it in risks, proceed with available info
+- If a KB file exists but is empty/malformed: **WARN** user, suggest running Bootstrap
+- If `feature_map.yaml` has no matching features: note this — it may mean KB is outdated
+- If `_meta.yaml` shows `completeness` < 0.5 for a critical file: flag as a risk
+
+## Important Rules
+
+- **Be thorough**: List ALL affected files, not just the obvious ones. Include tests, types, styles.
+- **Use cross-reference IDs**: Always reference features, contracts, and models by their stable IDs.
+- **Check for ripple effects**: A change to a shared component/service affects all consumers.
+- **Flag risks early**: If the task requires cross-repo changes, highlight this prominently.
+- **Never skip inventory**: Even for "simple" tasks, inventory prevents surprises.
+- **Classify impact levels**: HIGH = core logic change, MEDIUM = supporting change, LOW = cosmetic/docs

@@ -1,0 +1,108 @@
+# =============================================================================
+# Data Models & Entity Relations
+# =============================================================================
+# Primary owner: Backend / Database team
+# Auto-detected: ORM models, Prisma schema, migration files
+# Human input needed: business-level validation rules, cascade behavior intent
+#
+# Purpose: Source of truth for database structure. Prevents AI from generating
+# queries that violate the schema, use wrong field names, or create incompatible
+# migrations. Reduces hallucination by grounding all data operations in reality.
+#
+# Business-level entity definitions are in domain_glossary.yaml.
+# This file covers the TECHNICAL schema.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["backend", "fullstack", "monorepo"]
+  requires_human_input:
+    - "entities[*].fields[*].validation"
+    - "entities[*].relations[*].cascade"
+
+data_models:
+  # ORM / database configuration
+  orm: ""                               # e.g., Prisma, TypeORM, Sequelize, SQLAlchemy, GORM, Mongoose, Drizzle
+  database: ""                          # e.g., PostgreSQL, MySQL, MongoDB, SQLite
+  schema_file: ""                       # Schema definition file (e.g., "prisma/schema.prisma")
+  migration_dir: ""                     # Migration files directory (e.g., "prisma/migrations/")
+  migration_tool: ""                    # e.g., "prisma migrate", "alembic", "custom SQL scripts"
+  seed_file: ""                         # Database seed script path
+
+  # Database connection configuration
+  connection:
+    config_file: ""                     # Where connection is configured
+    read_replicas: false                # Whether read replicas are used
+    connection_pool: ""                 # Pool configuration summary
+    schemas: []                         # Database schemas used (e.g., ["public", "original", "sys"])
+
+  # Entity definitions
+  # Every entity MUST have an `entity_id` for cross-referencing.
+  entities: []
+    # - entity_id: "model:user"
+    #   name: "User"
+    #   table_name: "users"               # Actual database table name (may differ from model name)
+    #   db_schema: "public"               # Database schema (if multi-schema)
+    #   source_file: "models/user.js"     # Model definition file
+    #   description: "Application user account"
+    #   glossary_ref: "term:user"         # Cross-ref -> domain_glossary.yaml
+    #   fields:
+    #     - name: "id"
+    #       type: "UUID"
+    #       nullable: false
+    #       unique: true
+    #       default: "uuid()"
+    #       validation: ""                # HUMAN: business validation
+    #     - name: "email"
+    #       type: "String"
+    #       nullable: false
+    #       unique: true
+    #       validation: "valid email format"
+    #     - name: "role"
+    #       type: "Enum(admin, editor, viewer)"
+    #       nullable: false
+    #       default: "viewer"
+    #   relations:
+    #     - target: "model:post"          # Cross-ref to another entity_id
+    #       type: "one-to-many"
+    #       foreign_key: "authorId"
+    #       cascade: "CASCADE"            # HUMAN: verify intent
+    #       description: "Posts authored by this user"
+    #   indexes:
+    #     - name: "idx_users_email"
+    #       columns: ["email"]
+    #       unique: true
+    #       type: "btree"                 # btree | hash | gin | gist
+    #     - name: "idx_users_role"
+    #       columns: ["role"]
+    #       unique: false
+    #       type: "btree"
+    #   soft_delete: true
+    #   audit_fields: ["createdAt", "updatedAt", "deletedAt"]
+    #   query_patterns:                   # Common query patterns for this entity
+    #     - "Find by email (login)"
+    #     - "List by role with pagination"
+    #   performance_hints: ""             # e.g., "email lookups are hot path, ensure index"
+
+  # Naming conventions for database objects.
+  # AI must follow these when generating migrations or model code.
+  naming_conventions:
+    table_name: ""                      # e.g., "snake_case, plural: users, order_items"
+    column_name: ""                     # e.g., "snake_case: created_at, user_id"
+    foreign_key: ""                     # e.g., "{referenced_table_singular}_id"
+    index_name: ""                      # e.g., "idx_{table}_{columns}"
+    migration: ""                       # e.g., "YYYYMMDDHHMMSS_description"
+    enum: ""                            # e.g., "PascalCase: UserRole, OrderStatus"
+
+  # Migration history summary (optional — helps AI understand schema evolution)
+  migration_history: []
+    # - date: "2024-01-15"
+    #   file: "schema/20240115.sql"
+    #   description: "Add searching_tags column to resource table"
+    # - date: "2024-02-01"
+    #   file: "schema/20240201.sql"
+    #   description: "Create promotions table"

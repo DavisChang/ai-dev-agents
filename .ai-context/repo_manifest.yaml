@@ -1,0 +1,94 @@
+# =============================================================================
+# Repo Manifest — Multi-repo ecosystem description
+# =============================================================================
+# This file describes the broader system this project belongs to.
+# AI agents read this to understand cross-repo dependencies, shared
+# contracts, and the impact of changes across the ecosystem.
+#
+# This file is mostly filled manually since other repos' information
+# cannot be inferred from this project alone.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["frontend", "backend", "fullstack", "monorepo"]
+  requires_human_input:
+    - "ecosystem.repos"
+    - "ecosystem.this_repo.provides"
+    - "ecosystem.this_repo.consumes"
+
+ecosystem:
+  name: ""                              # System/platform name
+  description: ""                       # Brief description of the overall system
+
+  # This project's role in the ecosystem
+  this_repo:
+    name: ""                            # This repo's name
+    role: ""                            # frontend | backend | library | infra | mobile | gateway
+    provides: []                        # What this repo provides to others
+      # - type: "rest-api"
+      #   description: "Content management REST API"
+      #   contract_ref: "contract:rest-v2-admin"  # Cross-ref -> contract_registry.yaml
+    consumes: []                        # What this repo consumes from others
+      # - type: "graphql-api"
+      #   description: "Subscription data"
+      #   from_repo: "subscription-service"
+      #   contract_ref: "contract:graphql-subscription"
+
+  # Communication patterns across repos
+  communication_patterns: []
+    # - pattern: "synchronous REST"
+    #   between: ["this-repo", "auth-service"]
+    #   description: "Token validation on every request"
+    # - pattern: "async events"
+    #   between: ["this-repo", "notification-service"]
+    #   description: "Content published events trigger notifications"
+
+  # Deployment coordination requirements
+  deployment_coordination:
+    requires_ordered_deploy: false       # Whether repos must deploy in order
+    deploy_order: []                     # e.g., ["auth-service", "this-repo", "frontend"]
+    shared_migrations: false             # Whether DB migrations affect multiple repos
+    notes: ""
+
+  # Shared contracts — contracts used by multiple repos
+  shared_contracts: []
+    # - name: "Auth Token Format"
+    #   type: "JWT"
+    #   repos: ["auth-service", "this-repo", "frontend"]
+    #   owner: "auth-service"
+
+  # Other repos in the ecosystem
+  repos: []                             # HUMAN: Fill in manually
+    # - name: "backend-api"
+    #   role: backend
+    #   tech: "Python / FastAPI"
+    #   relationship: upstream             # upstream | downstream | sibling | shared-lib
+    #   api_endpoint: "https://api.example.com"
+    #   repo_url: ""                       # Git URL if accessible
+    #   provides:
+    #     - "GraphQL API for content queries"
+    #     - "REST API for file management"
+    #   notes: ""
+    #
+    # - name: "shared-auth-lib"
+    #   role: library
+    #   tech: "TypeScript"
+    #   relationship: shared-lib
+    #   package_name: "@org/auth"
+    #   version: "4.3.0"
+    #   provides:
+    #     - "Authentication hooks and utilities"
+    #   notes: "Published to private npm registry"
+    #
+    # - name: "mobile-app"
+    #   role: mobile
+    #   tech: "Kotlin / Swift"
+    #   relationship: sibling
+    #   provides:
+    #     - "Native app that embeds web app via WebView"
+    #   notes: "Communicates via window.ExternalObject bridge"

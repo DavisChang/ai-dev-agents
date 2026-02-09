@@ -1,0 +1,99 @@
+# =============================================================================
+# Environment Map — Environment configurations
+# =============================================================================
+# This file records each environment's configuration, endpoints, and
+# deployment targets. AI agents reference this to generate environment-aware
+# code and avoid hardcoding environment-specific values.
+#
+# Bootstrap Agent auto-detects environments from .env* files and CI configs.
+# Human input is needed for: deployment targets, feature flags, secrets
+# management, and SLOs.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["frontend", "backend", "fullstack", "monorepo"]
+  requires_human_input:
+    - "environments[*].deployment_target"
+    - "environments[*].slo"
+    - "environments[*].secrets_source"
+
+# Key environment variables used by the application.
+# AI must reference these instead of hardcoding values.
+env_vars: []
+  # - name: "DATABASE_URL"
+  #   purpose: "PostgreSQL connection string"
+  #   required: true
+  #   default: ""
+  #   sensitive: true                     # true = never log or expose
+  # - name: "API_BASE_URL"
+  #   purpose: "Base URL for upstream API"
+  #   required: true
+  #   default: "http://localhost:3000"
+  #   sensitive: false
+
+environments: []
+  # Example entries:
+  #
+  # - name: development
+  #   env_file: ".env.dev"
+  #   is_production: false
+  #   api_endpoints:
+  #     graphql: "https://api.dev.example.com/graphql"
+  #     rest: "https://api.dev.example.com/api/v1"
+  #   database:
+  #     type: "PostgreSQL"
+  #     host_env_var: "DB_HOST"
+  #     read_replicas: false
+  #   cache:
+  #     type: "Redis"
+  #     host_env_var: "REDIS_URL"
+  #   queue:
+  #     type: ""                          # e.g., "RabbitMQ", "SQS"
+  #     host_env_var: ""
+  #   feature_flags:
+  #     enable_new_search: true
+  #     enable_analytics: false
+  #   deployment_target: "local / Docker Compose"
+  #   secrets_source: "local .env file"   # HUMAN: e.g., "AWS Secrets Manager", "Vault"
+  #   monitoring:
+  #     apm_endpoint: ""
+  #     log_level: "debug"
+  #   slo: {}                             # No SLO for dev
+  #   rollback_procedure: ""
+  #   access_control: "any developer"
+  #   notes: "Used for local development"
+  #
+  # - name: production
+  #   env_file: ".env"
+  #   is_production: true
+  #   api_endpoints:
+  #     rest: "https://api.example.com/api/v1"
+  #   database:
+  #     type: "PostgreSQL"
+  #     host_env_var: "DB_HOST"
+  #     read_replicas: true
+  #   cache:
+  #     type: "Redis"
+  #     host_env_var: "REDIS_URL"
+  #   queue:
+  #     type: ""
+  #     host_env_var: ""
+  #   feature_flags:
+  #     enable_new_search: false
+  #     enable_analytics: true
+  #   deployment_target: "AWS ECS"        # HUMAN: Where this deploys
+  #   secrets_source: "AWS Secrets Manager"
+  #   monitoring:
+  #     apm_endpoint: "https://apm.example.com"
+  #     log_level: "warn"
+  #   slo:                                # HUMAN: Service Level Objectives
+  #     availability: "99.9%"
+  #     p99_latency: "200ms"
+  #   rollback_procedure: ""              # HUMAN: How to rollback
+  #   access_control: "deploy pipeline only"
+  #   notes: "Production — extra caution required"

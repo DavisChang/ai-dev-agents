@@ -1,0 +1,104 @@
+# =============================================================================
+# Design System & Tokens
+# =============================================================================
+# Primary owner: Designer / Frontend Lead
+# Auto-detected: tailwind.config.*, CSS custom properties, theme files, Storybook
+# Human input needed: interaction specs, accessibility requirements, state designs
+#
+# Purpose: Ensure AI-generated UI code uses correct design tokens and existing
+# components instead of hardcoded values. Reduces hallucination by providing
+# the single source of truth for all visual and interaction specifications.
+#
+# NOTE: This file is SKIPPED for backend-only or library projects.
+# =============================================================================
+
+_meta:
+  schema_version: "2.0"
+  last_updated: ""
+  updated_by: "bootstrap"
+  completeness: 0.0
+  applicable_when:
+    project_type: ["frontend", "fullstack"]    # SKIP for backend, library, cli
+  requires_human_input:
+    - "design_system.accessibility"
+    - "design_system.states"
+    - "design_system.components[*].props"
+
+design_system:
+  # Where the design system is defined
+  source: ""                            # Design system source (Figma URL, Storybook URL, etc.)
+  component_library: ""                 # e.g., shadcn/ui, MUI, Ant Design, Chakra UI, custom
+  storybook_url: ""                     # Storybook URL if available
+
+  # Design tokens — the atomic values that compose the visual language.
+  # AI must use these tokens instead of hardcoded values.
+  tokens:
+    colors:
+      primary: ""                       # Primary brand color
+      secondary: ""                     # Secondary color
+      semantic: {}                      # {success: "", warning: "", error: "", info: ""}
+      neutrals: []                      # Grayscale series
+    spacing:
+      base_unit: ""                     # e.g., "4px", "0.25rem"
+      scale: []                         # e.g., [4, 8, 12, 16, 24, 32, 48, 64]
+    typography:
+      font_families: {}                 # {heading: "", body: "", mono: ""}
+      scale: []                         # e.g., ["xs", "sm", "base", "lg", "xl", "2xl"]
+      line_heights: {}                  # {tight: "", normal: "", relaxed: ""}
+    border_radius: {}                   # {sm: "", md: "", lg: "", full: ""}
+    shadows: {}                         # {sm: "", md: "", lg: "", xl: ""}
+    breakpoints: {}                     # {sm: 640, md: 768, lg: 1024, xl: 1280}
+    z_index: {}                         # {dropdown: 10, modal: 50, toast: 100}
+
+  # Theme modes
+  theme:
+    modes: []                           # e.g., ["light", "dark", "system"]
+    default_mode: ""                    # e.g., "system"
+    toggle_implementation: ""           # How to switch themes
+
+  # Existing reusable components.
+  # AI should use these instead of creating new ones.
+  components: []
+    # - name: "Button"
+    #   path: "src/components/ui/button.tsx"
+    #   variants: ["default", "destructive", "outline", "secondary", "ghost", "link"]
+    #   props:
+    #     - name: "size"
+    #       type: "enum"
+    #       values: ["default", "sm", "lg", "icon"]
+    #       required: false
+    #       default: "default"
+    #     - name: "disabled"
+    #       type: "boolean"
+    #       required: false
+    #       default: false
+    #   dependencies: []                  # Other components this depends on
+
+  # UI patterns and conventions
+  patterns:
+    layout: ""                          # e.g., "CSS Grid + Flexbox"
+    icon_set: ""                        # e.g., "lucide-react"
+    icon_naming: ""                     # e.g., "PascalCase: <IconName />"
+    animation: ""                       # e.g., "framer-motion", "CSS transitions only"
+
+  # Accessibility requirements
+  accessibility:
+    wcag_level: ""                      # e.g., "AA"
+    min_contrast_ratio: ""              # e.g., "4.5:1 for normal, 3:1 for large"
+    focus_visible_style: ""             # e.g., "ring-2 ring-offset-2 ring-primary"
+    aria_patterns: []                   # Common ARIA patterns used
+    keyboard_navigation: ""             # Keyboard nav requirements
+
+  # Theme CSS Modules
+  theme_modules: []
+    # - file: "src/styles/theme/text.module.css"
+    #   purpose: "Text colors for light/dark theme"
+    #   exports: ["textPrimary", "textSecondary", "textMuted"]
+
+  # UI state patterns — how to handle non-happy-path states
+  states:
+    loading: ""                         # e.g., "skeleton shimmer using <Skeleton />"
+    empty: ""                           # e.g., "centered illustration + description + CTA"
+    error: ""                           # e.g., "inline alert with retry action"
+    not_found: ""                       # 404 pattern
+    unauthorized: ""                    # Permission denied pattern

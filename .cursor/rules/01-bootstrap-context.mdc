@@ -1,0 +1,312 @@
+---
+description: Bootstrap Agent - auto-detects project tech stack and populates the .ai-context/ knowledge base
+globs: .ai-context/**
+alwaysApply: false
+---
+
+# Bootstrap Context Agent
+
+You are the Knowledge Base Builder and Installer. Your job is to install template files (if cloned from the template repo), scan this project, and populate all `.ai-context/` files with accurate, structured information.
+
+## Step 0: Install Template Files (First-Time Setup)
+
+Check if `ai-dev-agents/` subdirectory exists in the project root (the cloned template repo):
+
+1. **If `ai-dev-agents/` exists and `.ai-context/` does NOT exist at project root**:
+   - Copy all files from `ai-dev-agents/.ai-context/` to project root `.ai-context/`
+   - Create `.cursor/rules/` if it doesn't exist
+   - Copy all `.mdc` files from `ai-dev-agents/.cursor/rules/` to `.cursor/rules/`
+   - **Skip** any file that already exists (never overwrite human-edited content)
+   - Report: list of copied files and skipped files
+
+2. **If `.ai-context/` already exists at project root**: Skip installation, proceed to scanning.
+
+3. **If `ai-dev-agents/` does NOT exist**: Assume files are already in place, proceed to scanning.
+
+---
+
+## Step 0.5: Detect Project Type (FIRST — drives all subsequent steps)
+
+Determine the project type based on directory structure and dependencies:
+
+| Signal | Project Type |
+|--------|-------------|
+| Has `src/pages/`, `src/app/`, or frontend framework (react, vue, angular, svelte) | `frontend` |
+| Has `route/`, `controller/`, `services/`, `cmd/`, or backend framework (express, fastapi, django, spring, gin) | `backend` |
+| Has both frontend AND backend signals | `fullstack` |
+| Has `bin/` CLI entry + no server | `cli` |
+| Has workspace config (pnpm-workspace.yaml, nx.json, lerna.json, turborepo.json) | `monorepo` |
+| Only a library/SDK (no server, no CLI, no pages) | `library` |
+
+Store the result in `_meta.yaml` → `project_type`.
+
+**Use `project_type` to SKIP irrelevant KB files throughout the rest of bootstrap.**
+For example, skip `design_system.yaml` for `backend` projects.
+
+---
+
+## Step 1: Detect Project Profile
+
+Scan the project root for configuration files and populate `.ai-context/project_profile.yaml`.
+
+### 1a. Package/dependency detection (check in order, use first found)
+
+- `package.json` → Node.js. Read `name`, `version`, `description`, `scripts`, `dependencies`, `devDependencies`
+- `pyproject.toml` / `setup.py` / `requirements.txt` → Python
+- `go.mod` → Go
+- `Cargo.toml` → Rust
+- `build.gradle` / `build.gradle.kts` / `pom.xml` → Java/Kotlin
+- `*.csproj` / `*.sln` → C#/.NET
+- `pubspec.yaml` → Dart/Flutter
+
+**Error handling**: If no dependency file found, set `tech_stack.languages: ["unknown"]` and log in `_meta.yaml` → `detection_failures`.
+
+### 1b. Lock file → package manager
+
+- `pnpm-lock.yaml` → pnpm | `package-lock.json` → npm | `yarn.lock` → yarn | `bun.lockb` → bun
+- `poetry.lock` → poetry | `Pipfile.lock` → pipenv | `go.sum` → go mod | `Cargo.lock` → cargo
+
+### 1c. Framework detection (from dependencies)
+
+- `next` → Next.js | `react` → React | `vue` → Vue | `@angular/core` → Angular | `svelte` → Svelte
+- `express` → Express.js | `fastify` → Fastify | `@nestjs/core` → NestJS
+- `fastapi` → FastAPI | `django` → Django | `flask` → Flask
+- `spring-boot` → Spring Boot | `gin-gonic/gin` → Gin
+
+### 1d. Test framework detection
+
+- `vitest.config.*` → Vitest | `jest.config.*` or `jest` in package.json → Jest
+- `pytest.ini` / `[tool.pytest]` in pyproject.toml → Pytest | `*_test.go` → Go testing
+
+### 1e. CI/CD detection
+
+- `.github/workflows/` → GitHub Actions | `.pipeline/` / `azure-pipelines.yml` → Azure DevOps
+- `.gitlab-ci.yml` → GitLab CI | `Jenkinsfile` → Jenkins | `.circleci/` → CircleCI
+
+### 1f. API layer detection
+
+- `*.graphql` files or `graphql` dependency → GraphQL
+- `openapi.yaml` / `swagger.json` → REST with OpenAPI
+- `*.proto` files → gRPC | `trpc` in dependencies → tRPC
+
+### 1g. Critical dependencies (new in v2.0)
+
+Scan for database, cache, queue, and storage dependencies:
+- `pg` / `sequelize` / `prisma` / `typeorm` → PostgreSQL
+- `mysql2` / `mongoose` / `mongodb` → MySQL / MongoDB
+- `redis` / `ioredis` → Redis
+- `amqplib` / `kafkajs` / `@aws-sdk/client-sqs` → message queues
+- `aws-sdk` / `@aws-sdk/client-s3` → AWS S3
+- `docker-compose*` → scan for service dependencies
+
+Populate `project_profile.yaml` → `critical_dependencies`.
+
+### 1h. Runtime requirements
+
+Check `Dockerfile` for system packages (e.g., `apt-get install ffmpeg imagemagick`).
+Populate `project_profile.yaml` → `runtime_requirements`.
+
+### 1i. Commands, structure, constants, runtime extensions, routing
+
+Same as before — extract from `package.json` scripts, analyze directory tree, detect constants, scan `*.d.ts` files, read `next.config.*` / `vite.config.*`.
+
+**Error handling**: If any sub-step (1a–1i) fails, log it in `_meta.yaml` → `detection_failures` and continue to the next sub-step.
+
+---
+
+## Step 2: Populate Feature Map
+
+Scan source code to identify features and populate `.ai-context/feature_map.yaml`.
+
+1. **Find entry points**: page files, route definitions, main modules
+2. **Trace component trees**: for each entry point, identify key components/controllers
+3. **Find data sources**: query files, API calls, database models, service files
+4. **Group by feature**: cluster related files into logical features
+5. **Assign feature IDs**: each feature gets a stable `id` (e.g., `feat:user-auth`)
+6. **Add cross-references**: link to contracts, models, and terms where detectable
+7. **Identify shared infrastructure**: hooks, utils, middleware → separate entries
+8. **Mark TODO**: business rules and dependencies need human input
+
+---
+
+## Step 3: Populate Contract Registry
+
+Scan for API contracts and populate `.ai-context/contract_registry.yaml`.
+
+1. **REST/GraphQL/gRPC**: find schema files, route definitions, codegen configs
+2. **External services**: find axios/fetch/HTTP client usage, identify external URLs
+3. **Events**: find message consumer/producer code, AsyncAPI specs
+4. **Assign contract IDs**: each contract gets `id` (e.g., `contract:rest-v2-admin`)
+5. **Detect auth requirements**: check for auth middleware on routes
+6. **Detect error codes**: check for standardized error response patterns
+7. **Internal interfaces**: find shared library interfaces
+
+---
+
+## Step 4: Populate Environment Map
+
+Scan environment files and populate `.ai-context/environment_map.yaml`.
+
+1. **Find .env files**: `.env`, `.env.*`, `.env.local`, `example.env`
+2. **Extract env vars**: list all with purpose, sensitivity flag, and defaults
+3. **Match to CI config**: deployment stages, environment names
+4. **Detect DB/cache/queue per environment**: from config files
+5. **Mark TODO**: deployment targets, secrets source, SLOs
+
+---
+
+## Step 5: Populate Coding Standards
+
+Analyze code and populate `.ai-context/coding_standards.yaml` (YAML, not Markdown).
+
+1. **Read lint config**: ESLint, Prettier, Pylint, etc. → populate `lint` and `format` sections
+2. **Read @stylistic rules**: specifically look for `@stylistic/` prefixed ESLint rules
+3. **Analyze file naming**: detect patterns from existing files → populate `naming`
+4. **Analyze imports**: detect path aliases, import ordering → populate `imports`
+5. **Analyze patterns**: detect component/service/middleware patterns → populate `patterns`
+6. **Detect routing config**: basePath, router type → populate `routing`
+7. **Detect API patterns**: route constants file, fetch defaults → populate `api_patterns`
+8. **Detect error handling**: error format, error codes file → populate `error_handling`
+9. **Detect git conventions**: commitlint, branch naming → populate `git`
+10. **Mark TODO**: team preferences and anti-patterns
+
+---
+
+## Step 6: Populate Domain Glossary
+
+Scan code for domain terms and populate `.ai-context/domain_glossary.yaml`.
+
+1. **Find enums, constants, type definitions**: populate `code_enums` with exact values
+2. **Find role/permission definitions**: auth middleware, RBAC code → populate `roles`
+3. **Extract entity names**: from ORM models, database schemas → populate `terms`
+4. **Detect feature flags**: scan constants/env files → populate as terms
+5. **Mark TODO**: precise definitions, lifecycle states, validation rules
+
+---
+
+## Step 7: Populate Design System (SKIP if `project_type` is `backend`, `library`, or `cli`)
+
+Scan for design system artifacts and populate `.ai-context/design_system.yaml`.
+
+1. **Tailwind config**: colors, spacing, breakpoints, fonts
+2. **CSS custom properties**: scan for `--` variables
+3. **Theme files**: MUI theme, Chakra theme, etc.
+4. **Component library**: detect from dependencies
+5. **Icon set**: detect from imports
+6. **Storybook**: check for `.storybook/`
+7. **Mark TODO**: interaction specs, accessibility, state designs
+
+If skipped, add `"design_system.yaml"` to `_meta.yaml` → `skipped_files` and set `completeness.design_system: -1`.
+
+---
+
+## Step 8: Populate Data Models (SKIP if `project_type` is `frontend` without any DB/ORM dependency)
+
+Scan for database schema and populate `.ai-context/data_models.yaml`.
+
+1. **ORM detection**: Prisma, TypeORM, Sequelize, SQLAlchemy, GORM, Mongoose, Drizzle
+2. **Entity extraction**: model files → entity definitions with `entity_id`
+3. **Field mapping**: types, nullability, defaults, unique constraints
+4. **Relation detection**: foreign keys, join tables
+5. **Index detection**: from schema files or migration files
+6. **Connection config**: read/write replication, connection pool, DB schemas
+7. **Migration history**: scan migration directory for recent changes
+8. **Mark TODO**: business validation rules, cascade intent
+
+---
+
+## Step 9: Populate Test Strategy
+
+Scan for test configuration and populate `.ai-context/test_strategy.yaml`.
+
+1. **Test config files**: vitest.config, jest.config, pytest.ini, etc.
+2. **Coverage config**: from test config or CI pipeline
+3. **E2E config**: Playwright/Cypress config
+4. **CI test steps**: extract test-related steps from CI config
+5. **Existing test structure**: analyze directory organization and patterns
+6. **Mark TODO**: coverage targets, performance baselines, security checklists, mocking guidelines
+
+---
+
+## Step 10: Populate Repo Manifest
+
+Scan for ecosystem information and populate `.ai-context/repo_manifest.yaml`.
+
+1. **This repo's role**: determine from project type and API layer
+2. **Detect consumed services**: from config files, env vars, HTTP client setup
+3. **Mark TODO**: other repos, communication patterns, deployment coordination (mostly manual)
+
+---
+
+## Step 11: Generate `_meta.yaml` (FINAL STEP)
+
+After populating all files, generate `.ai-context/_meta.yaml`:
+
+1. **Set `project_type`** from Step 0.5
+2. **Set `last_bootstrap`** to current timestamp
+3. **Calculate `completeness`** per file (ratio of populated vs empty fields)
+4. **Set `overall_completeness`** (weighted average, excluding skipped files)
+5. **List `skipped_files`** (files N/A for this project type)
+6. **List `detection_failures`** (any steps that failed)
+7. **Populate `gaps_by_owner`** organized by team:
+   - **PM**: domain_glossary terms/definitions, feature_map business_rules
+   - **Designer**: design_system accessibility, interaction specs
+   - **Backend**: data_models validation, contract_registry policies
+   - **QA**: test_strategy coverage targets, quality gates
+   - **Infra**: environment_map deploy targets, repo_manifest ecosystem
+
+---
+
+## Step 12: Gap Analysis Report
+
+Output a summary for the user:
+
+```
+## Bootstrap Complete — Schema v2.0
+
+### Project Type: [detected type]
+
+### Auto-populated:
+- [x] project_profile.yaml (XX% complete)
+- [x] feature_map.yaml (XX% complete — needs business rules)
+- [x] contract_registry.yaml (XX% complete)
+- [x] environment_map.yaml (XX% complete)
+- [x] coding_standards.yaml (XX% complete — needs team preferences)
+- [x] domain_glossary.yaml (XX% complete — needs PM definitions)
+- [x/skipped] design_system.yaml (XX% or skipped for backend)
+- [x] data_models.yaml (XX% complete — needs business validation)
+- [x] test_strategy.yaml (XX% complete — needs QA targets)
+- [x] repo_manifest.yaml (XX% — mostly manual)
+
+### Detection Failures (if any):
+- [step]: [reason] — [impact]
+
+### Needs human input by domain:
+
+**PM / Product Owner:**
+- [ ] domain_glossary.yaml: term definitions, role permissions, business entity lifecycle
+- [ ] feature_map.yaml: business_rules for each feature
+
+**Designer / Frontend Lead:**
+- [ ] design_system.yaml: interaction specs, accessibility, UI state designs
+
+**Backend Team:**
+- [ ] data_models.yaml: business validation rules, cascade behavior
+- [ ] contract_registry.yaml: versioning strategy, deprecation policy
+
+**QA / Tech Lead:**
+- [ ] test_strategy.yaml: coverage targets, quality gates, mocking guidelines
+
+**Infra / DevOps:**
+- [ ] environment_map.yaml: deployment targets, secrets management, SLOs
+- [ ] repo_manifest.yaml: other repos in ecosystem, deploy coordination
+```
+
+## Important Rules
+
+- **Never invent or guess** values. If you cannot detect something, leave it empty and mark as TODO.
+- **Preserve existing content**: If a file already has content, merge new findings; do not overwrite human-provided values. Lines with `# HUMAN:` prefix are NEVER modified.
+- **Use relative paths**: All file paths should be relative to the project root.
+- **Be precise with versions**: Read exact version numbers from config files.
+- **Log failures**: Every detection failure goes into `_meta.yaml` → `detection_failures`.
+- **Skip N/A files**: Check `project_type` before populating each file.

@@ -1,0 +1,123 @@
+# =============================================================================
+# Task Template (YAML) — Structured format for AI agent consumption
+# =============================================================================
+# Copy this file to .ai-context/tasks/{task-name}.yaml and fill in requirements.
+# Then follow the three-phase workflow: Inventory -> Proposal -> Implementation.
+#
+# A Markdown version (task_template.md) is also available for human readability.
+# Agents should consume this YAML format for reliable parsing.
+# =============================================================================
+
+task_id: ""                             # Unique task identifier (e.g., "add-search-api")
+title: ""                               # Human-readable task title
+status: "draft"                         # draft | inventory | proposal | approved | in_progress | review | done
+priority: "medium"                      # high | medium | low
+estimated_scope: "medium"               # small | medium | large
+created: ""                             # ISO 8601 timestamp
+updated: ""                             # ISO 8601 timestamp
+
+# ---------------------------------------------------------------
+# Requirements
+# ---------------------------------------------------------------
+requirements:
+  description: ""                       # What needs to be done
+  acceptance_criteria: []               # List of measurable criteria
+    # - "API returns paginated results with max 50 items per page"
+    # - "Response time < 200ms for 95th percentile"
+    # - "All existing tests continue to pass"
+  constraints: []                       # Any constraints or limitations
+    # - "Must be backward compatible with v1 API"
+
+# ---------------------------------------------------------------
+# Phase 1: Inventory (populated by Agent 02)
+# ---------------------------------------------------------------
+phases:
+  inventory:
+    status: "pending"                   # pending | in_progress | complete | skipped
+    affected_features: []
+      # - feature_id: "feat:content-management"
+      #   impact: "HIGH"                # HIGH | MEDIUM | LOW
+      #   reason: "New endpoint in content module"
+    affected_contracts: []
+      # - contract_id: "contract:rest-v2-admin"
+      #   change_type: "additive"       # additive | breaking | none
+      #   details: "New GET /api/v2/admin/search endpoint"
+    affected_models: []
+      # - entity_id: "model:content"
+      #   change_type: "none"           # new_entity | new_field | modified | none
+      #   details: ""
+    new_files: []
+    modified_files: []
+    deleted_files: []
+    cross_repo_impacts: []
+      # - repo: "frontend-app"
+      #   impact: "Must update API client after new endpoint is deployed"
+      #   coordination_needed: true
+    existing_code_to_reuse: []
+      # - file: "services/content.js"
+      #   reason: "Existing query scopes can be extended"
+    risks: []
+      # - description: "Search performance on large datasets"
+      #   severity: "MEDIUM"
+      #   mitigation: "Add database index on searchable fields"
+
+  # ---------------------------------------------------------------
+  # Phase 2: Proposal (populated by Agent 03)
+  # ---------------------------------------------------------------
+  proposal:
+    status: "pending"
+    architecture_decisions: []
+      # - decision: "Use database full-text search (tsvector) instead of Elasticsearch"
+      #   rationale: "Simpler infrastructure, sufficient for current scale"
+      #   alternatives_considered:
+      #     - "Elasticsearch — rejected: over-engineering for current dataset size"
+    task_breakdown: []
+      # - step: 1
+      #   description: "Add search scope to content service"
+      #   files: ["services/content.js"]
+      #   estimated_effort: "small"
+      # - step: 2
+      #   description: "Add search route and controller"
+      #   files: ["route/api/originals/v2/admin/search.js", "controller/v2/admin/search.js"]
+      #   estimated_effort: "small"
+    contract_changes: []
+      # - contract_id: "contract:rest-v2-admin"
+      #   change: "Add GET /api/v2/admin/content/search?q={query}"
+      #   breaking: false
+    test_plan: []
+      # - type: "unit"
+      #   target: "Search service logic"
+      #   file: "tests/services/content.test.js"
+      # - type: "integration"
+      #   target: "Search API endpoint"
+      #   file: "tests/api/v2/admin/search.test.js"
+    risks: []
+      # - risk: "Full-text search performance"
+      #   likelihood: "medium"
+      #   impact: "medium"
+      #   mitigation: "Add GIN index on tsvector column"
+    kb_updates_needed: []
+      # - file: "feature_map.yaml"
+      #   change: "Add search feature entry"
+      # - file: "contract_registry.yaml"
+      #   change: "Add search endpoint to admin API contract"
+
+  # ---------------------------------------------------------------
+  # Phase 3: Implementation (updated by Agent 04 during execution)
+  # ---------------------------------------------------------------
+  implementation:
+    status: "pending"
+    completed_steps: []
+      # - step: 1
+      #   status: "done"
+      #   actual_files_changed: ["services/content.js"]
+      #   notes: ""
+    tests_written: []
+      # - file: "tests/services/content.test.js"
+      #   passing: true
+    lint_passing: false
+    typecheck_passing: false
+    kb_updates_completed: []
+    deviations_from_proposal: []
+      # - description: "Used LIKE query instead of tsvector for MVP"
+      #   reason: "Simpler implementation, will upgrade in follow-up task"
